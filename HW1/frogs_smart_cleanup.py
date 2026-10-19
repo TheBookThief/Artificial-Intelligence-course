@@ -1,7 +1,7 @@
 # Cleaned version: 
 # - Merged the 2 jump functions in one
 # - Fixed type annotations
-# I think these are unnecessary but I acknowledge them:
+# I think these are unnecessary to spend time on right now but I acknowledge them:
 # 1) save only the pairs of swaps instead of full strings
 # 2) group the printing at the end
 
