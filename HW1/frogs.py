@@ -28,9 +28,10 @@ def dfs(state: str, path: List[List[str]]):
     flag = False
     count_more = 0
     count_less = 0
+    idx = 0
     for i in range(len(state)):
         if state[i] == '_':
-            # idx = i
+            idx = i
             flag = True
             continue 
         if state[i] == '>':
@@ -44,29 +45,26 @@ def dfs(state: str, path: List[List[str]]):
         if i < len(state)-2 and count_less < n//2 and flag == True and state[i] == '>' and state[i+1] == '>': 
             path.pop()
             return
-      
-    for i in range(len(state)):
-        if state[i] != '_': 
-            continue
-        if i > 0 and state[i-1] == '>':
-            swap(state, i, i-1)
-            dfs(state, path)
-            swap(state, i, i-1)
 
-        if i > 1 and state[i-2] == '>':
-            swap(state, i, i-2)
-            dfs(state, path)
-            swap(state, i, i-2)
+    if idx > 0 and state[idx-1] == '>':
+        swap(state, idx, idx-1)
+        dfs(state, path)
+        swap(state, idx, idx-1)
 
-        if i < len(state)-1 and state[i+1] == '<':
-            swap(state, i, i+1)
-            dfs(state, path)
-            swap(state, i, i+1)
+    if idx > 1 and state[idx-2] == '>':
+        swap(state, idx, idx-2)
+        dfs(state, path)
+        swap(state, idx, idx-2)
 
-        if i < len(state)-2 and state[i+2] == '<': 
-            swap(state, i, i+2)
-            dfs(state, path)
-            swap(state, i, i+2)
+    if idx < len(state)-1 and state[idx+1] == '<':
+        swap(state, idx, idx+1)
+        dfs(state, path)
+        swap(state, idx, idx+1)
+
+    if idx < len(state)-2 and state[idx+2] == '<': 
+        swap(state, idx, idx+2)
+        dfs(state, path)
+        swap(state, idx, idx+2)
 
     path.pop()
 
