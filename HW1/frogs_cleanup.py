@@ -23,7 +23,7 @@ def is_final(state: list[str]) -> bool:
 def swap(state: str, idx1: int, idx2: int) -> None:
     state[idx1], state[idx2] = state[idx2], state[idx1]
 
-def dfs(state: str, path: list[list[str]], n) -> None:
+def dfs(state: str, path: list[list[str]], n: int) -> None:
     path.append(copy.copy(state))
 
     if is_final(state):
