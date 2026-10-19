@@ -16,7 +16,7 @@ def is_final(state: List[str]) -> bool:
             return False
     return True
 
-def swap(state, idx1, idx2):
+def swap(state: str, idx1: int, idx2: int):
     state[idx1], state[idx2] = state[idx2], state[idx1]
 
 def dfs(state: str, path: List[List[str]]):
@@ -25,6 +25,26 @@ def dfs(state: str, path: List[List[str]]):
     if is_final(state):
         print_path(path)
 
+    flag = False
+    count_more = 0
+    count_less = 0
+    for i in range(len(state)):
+        if state[i] == '_':
+            # idx = i
+            flag = True
+            continue 
+        if state[i] == '>':
+            count_more += 1
+        elif state[i] == '<':
+            count_less += 1
+        
+        if i > 1 and count_more > 0 and flag == False and state[i] == '<' and state[i-1] == '<':
+            path.pop()
+            return
+        if i < len(state)-2 and count_less < n//2 and flag == True and state[i] == '>' and state[i+1] == '>': 
+            path.pop()
+            return
+      
     for i in range(len(state)):
         if state[i] != '_': 
             continue
