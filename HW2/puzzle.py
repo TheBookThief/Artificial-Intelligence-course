@@ -1,20 +1,19 @@
-import heapq
-import copy
 import math 
 from typing import List, Tuple
 from utils import build_final_table, check_valid_table, get_pos, table_print
 
 def manhattan_distance(table1: List[List[int]], table2: List[List[int]]) -> int:  
-    table1_entries = [(0,0)] * (len(table1)*len(table1))
-    table2_entries = [(0,0)] * (len(table2)*len(table2))
-    for i in range(len(table1)):
-        for j in range(len(table1)):
+    size = len(table1)
+    table1_entries = [(0,0)] * (size*size)
+    table2_entries = [(0,0)] * (size*size)
+    for i in range(size):
+        for j in range(size):
             table1_entries[table1[i][j]] = (i,j)
             table2_entries[table2[i][j]] = (i,j)
     def get_dist(idx1, idx2):
         return abs(idx1[0]-idx2[0])+abs(idx1[1]-idx2[1])
     dist = 0
-    for i in range(1, len(table1)*len(table1)):
+    for i in range(1, size*size):
         dist += get_dist(table1_entries[i], table2_entries[i])
     return dist
 
@@ -24,25 +23,24 @@ def get_neighbours(table: List[List[int]]):
     dirs = ["down", "right", "up", "left"]
 
     def valid(pos) -> bool:
-        if pos[0] < 0 or pos[0] >= len(table):
-            return False
-        if pos[1] < 0 or pos[1] >= len(table):
-            return False
-        return True
+        return  0 <= pos[0] < len(table) and 0 <= pos[1] < len(table)
 
-    swaps = []
     swaps_dir = []
+    old_pos = []
+    new_pos = []
     for dir, delta in zip(dirs, deltas):
         next_idx = (zero_pos[0]+delta[0],zero_pos[1]+delta[1])
         if valid(next_idx):
-            swaps.append(zero_pos+next_idx)
+            old_pos.append(zero_pos)
+            new_pos.append(next_idx)
             swaps_dir.append(dir)
 
-    return swaps, swaps_dir
+    return old_pos, new_pos, swaps_dir
 
-def print_ans(path: List[List[int]]) -> None:
+def print_ans(path: List[str]) -> None:
     print(len(path))
-    [print(x) for x in path]
+    for x in path:
+        print(x)
     exit(0)
 
 def ida_star(root: List[List[int]], final_table: List[List[int]]) -> None:
@@ -50,13 +48,8 @@ def ida_star(root: List[List[int]], final_table: List[List[int]]) -> None:
     prev_pos = (-1,-1)
     bound = manhattan_distance(root, final_table)
     while True:
-        mini = int(1e9+7)
         next_dist = bounded_search(root, prev_pos, parents, 0, bound, final_table)
-        if next_dist == -1:
-            print_ans()
-            break
-        else:
-            bound = next_dist
+        bound = next_dist
 
 def bounded_search(cur: List[List[int]], prev_pos: Tuple[int,int], parents: List[str], dist: int, bound: int, final_table: List[List[int]]) -> int:
     if cur == final_table:
@@ -67,14 +60,14 @@ def bounded_search(cur: List[List[int]], prev_pos: Tuple[int,int], parents: List
         return total_dist
 
     min_dist = int(1e9+7)
-    for ind, dir in zip(*get_neighbours(cur)):
-        if prev_pos[0] == ind[2] and prev_pos[1] == ind[3]:
+    for (zr, zc), (nr, nc), dir in zip(*get_neighbours(cur)):
+        if prev_pos == (nr, nc):
             continue  
-        cur[ind[0]][ind[1]], cur[ind[2]][ind[3]] = cur[ind[2]][ind[3]], cur[ind[0]][ind[1]]
+        cur[zr][zc], cur[nr][nc] = cur[nr][nc], cur[zr][zc]
         parents.append(dir)
-        min_dist = min(min_dist, bounded_search(cur, (ind[0], ind[1]), parents, dist + 1, bound, final_table))
+        min_dist = min(min_dist, bounded_search(cur, (zr, zc), parents, dist + 1, bound, final_table))
         parents.pop()
-        cur[ind[0]][ind[1]], cur[ind[2]][ind[3]] = cur[ind[2]][ind[3]], cur[ind[0]][ind[1]]
+        cur[zr][zc], cur[nr][nc] = cur[nr][nc], cur[zr][zc]
     
     return min_dist
 
@@ -85,7 +78,7 @@ if __name__ == '__main__':
     pos = int(input())
     if pos != -1:
         pos += 1
-    if pos == -1:
+    else:
         pos = num_rows*num_rows
     
     table = []
