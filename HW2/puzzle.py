@@ -3,8 +3,8 @@ import copy
 import math 
 from typing import List, Tuple
 from utils import build_final_table, check_valid_table, get_pos, table_print
-    
-def manhattan_distance(table1: List[List[int]], table2: List[List[int]]):  
+
+def manhattan_distance(table1: List[List[int]], table2: List[List[int]]) -> int:  
     table1_entries = [(0,0)] * (len(table1)*len(table1))
     table2_entries = [(0,0)] * (len(table2)*len(table2))
     for i in range(len(table1)):
@@ -23,7 +23,7 @@ def get_neighbours(table: List[List[int]]):
     deltas = [(-1,0), (0,-1), (1,0), (0,1)]
     dirs = ["down", "right", "up", "left"]
 
-    def valid(pos):
+    def valid(pos) -> bool:
         if pos[0] < 0 or pos[0] >= len(table):
             return False
         if pos[1] < 0 or pos[1] >= len(table):
@@ -40,13 +40,13 @@ def get_neighbours(table: List[List[int]]):
 
     return swaps, swaps_dir
 
-def print_ans(path: List[List[int]]):
-    print(len(path)-1)
-    [print(x) for x in path[1:]]
+def print_ans(path: List[List[int]]) -> None:
+    print(len(path))
+    [print(x) for x in path]
     exit(0)
 
-def ida_star(root: List[List[int]], final_table: List[List[int]]):
-    parents = [-1]
+def ida_star(root: List[List[int]], final_table: List[List[int]]) -> None:
+    parents = []
     prev_pos = (-1,-1)
     bound = manhattan_distance(root, final_table)
     while True:
@@ -58,7 +58,7 @@ def ida_star(root: List[List[int]], final_table: List[List[int]]):
         else:
             bound = next_dist
 
-def bounded_search(cur: List[List[int]], prev_pos: Tuple[int,int], parents: List[str], dist: int, bound: int, final_table: List[List[int]]):
+def bounded_search(cur: List[List[int]], prev_pos: Tuple[int,int], parents: List[str], dist: int, bound: int, final_table: List[List[int]]) -> int:
     if cur == final_table:
         print_ans(parents)
     
