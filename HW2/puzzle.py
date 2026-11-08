@@ -1,7 +1,7 @@
 import heapq
 import copy
 import math 
-from typing import List
+from typing import List, Tuple
 from utils import build_final_table, check_valid_table, get_pos, table_print
 
 def hash_table(table):
@@ -45,18 +45,15 @@ def get_neighbours(table: List[List[int]]):
             return False
         return True
 
-    neighbours = []
-    neighbours_dir = []
+    swaps = []
+    swaps_dir = []
     for dir, delta in zip(dirs, deltas):
         next_idx = (zero_pos[0]+delta[0],zero_pos[1]+delta[1])
         if valid(next_idx):
-            new_table = copy.deepcopy(table)
-            # s numpy arrays polzvaneto na tuple kato index e validno, ama reshih che samo s lists moje da se opravim makar da e grozno
-            new_table[zero_pos[0]][zero_pos[1]], new_table[next_idx[0]][next_idx[1]] = new_table[next_idx[0]][next_idx[1]], new_table[zero_pos[0]][zero_pos[1]] 
-            neighbours.append(new_table)
-            neighbours_dir.append(dir)
+            swaps.append(zero_pos+next_idx)
+            swaps_dir.append(dir)
 
-    return neighbours, neighbours_dir
+    return swaps, swaps_dir
 
 def print_ans(path: List[List[int]]):
     print(len(path)-1)
@@ -64,38 +61,37 @@ def print_ans(path: List[List[int]]):
     exit(0)
 
 def ida_star(root: List[List[int]], final_table: List[List[int]]):
-    path = [root]
     parents = [-1]
     cache_dist = {}
+    prev_pos = (-1,-1)
     bound = manhattan_distance(root, final_table, cache_dist)
     while True:
         mini = int(1e9+7)
-        next_dist = bounded_search(path, parents, 0, bound, final_table, cache_dist)
+        next_dist = bounded_search(root, prev_pos, parents, 0, bound, final_table, cache_dist)
         if next_dist == -1:
             print_ans()
             break
         else:
             bound = next_dist
 
-def bounded_search(path: List[List[int]], parents: List[List[int]], dist: int, bound: int, final_table: List[List[int]], cache_dist):
-    cur = path[-1]
-
+def bounded_search(cur: List[List[int]], prev_pos: Tuple[int,int], parents: List[str], dist: int, bound: int, final_table: List[List[int]], cache_dist):
     if cur == final_table:
         print_ans(parents)
-
+    
     total_dist = dist + manhattan_distance(cur, final_table, cache_dist)
     if total_dist > bound:
         return total_dist
-    
+
     min_dist = int(1e9+7)
-    for next, dir in zip(*get_neighbours(cur)):
-        if next in path:
-            continue    
-        path.append(next)
+    for ind, dir in zip(*get_neighbours(cur)):
+        if prev_pos[0] == ind[2] and prev_pos[1] == ind[3]:
+            continue  
+        cur[ind[0]][ind[1]], cur[ind[2]][ind[3]] = cur[ind[2]][ind[3]], cur[ind[0]][ind[1]]
         parents.append(dir)
-        min_dist = min(min_dist, bounded_search(path, parents, dist + 1, bound, final_table, cache_dist))
+        min_dist = min(min_dist, bounded_search(cur, (ind[0], ind[1]), parents, dist + 1, bound, final_table, cache_dist))
         parents.pop()
-        path.pop()
+        cur[ind[0]][ind[1]], cur[ind[2]][ind[3]] = cur[ind[2]][ind[3]], cur[ind[0]][ind[1]]
+    
     return min_dist
 
 if __name__ == '__main__':
