@@ -37,6 +37,7 @@ def get_neighbours(table: List[List[int]]):
     zero_pos = get_pos(table, 0)
     deltas = [(-1,0), (0,-1), (1,0), (0,1)]
     dirs = ["down", "right", "up", "left"]
+
     def valid(pos):
         if pos[0] < 0 or pos[0] >= len(table):
             return False
@@ -54,12 +55,12 @@ def get_neighbours(table: List[List[int]]):
             new_table[zero_pos[0]][zero_pos[1]], new_table[next_idx[0]][next_idx[1]] = new_table[next_idx[0]][next_idx[1]], new_table[zero_pos[0]][zero_pos[1]] 
             neighbours.append(new_table)
             neighbours_dir.append(dir)
+
     return neighbours, neighbours_dir
 
 def print_ans(path: List[List[int]]):
     print(len(path)-1)
     [print(x) for x in path[1:]]
-    # print("Path is: ",path[1:])
     exit(0)
 
 def ida_star(root: List[List[int]], final_table: List[List[int]]):
@@ -68,7 +69,6 @@ def ida_star(root: List[List[int]], final_table: List[List[int]]):
     cache_dist = {}
     bound = manhattan_distance(root, final_table, cache_dist)
     while True:
-        # print(20*"-")
         mini = int(1e9+7)
         next_dist = bounded_search(path, parents, 0, bound, final_table, cache_dist)
         if next_dist == -1:
@@ -114,20 +114,8 @@ if __name__ == '__main__':
         table.append(row)
 
     final_table = build_final_table(num_rows, pos)
-    # table_print(final_table)
     valid = check_valid_table(table, final_table)
-
-    # print(manhattan_distance(table,final_table))
     if valid == False:
         print(-1)
-        exit(0)
-    ida_star(table, final_table)
-
-
-"""
-8
--1
-1 2 3
-4 5 6
-8 7 0
-"""
+    else:
+        ida_star(table, final_table)
