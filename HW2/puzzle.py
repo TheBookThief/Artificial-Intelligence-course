@@ -52,7 +52,7 @@ def ida_star(root: List[List[int]], final_table: List[List[int]]):
     parents = [-1]
     bound = manhattan_distance(root, final_table)
     while True:
-        print(20*"-")
+        # print(20*"-")
         mini = 1e9+7
         next_dist = bounded_search(path, parents, 0, bound, final_table)
         if next_dist == -1:
@@ -62,26 +62,24 @@ def ida_star(root: List[List[int]], final_table: List[List[int]]):
             bound = next_dist
 
 def bounded_search(path: List[List[int]], parents: List[List[int]], dist: int, bound: int, final_table: List[List[int]]):
-    print(dist)
-    table_print(path[-1])
     cur = path[-1]
-    
+
     if cur == final_table:
         print_ans(parents)
 
+    total_dist = dist + manhattan_distance(cur, final_table)
+    if total_dist > bound:
+        return total_dist
+    
     min_dist = 1e9+7
     for next, dir in zip(*get_neighbours(cur)):
         if next in path:
-            continue
-        total_dist = 1 + dist + manhattan_distance(next, final_table)
-        if  total_dist <= bound:
-            path.append(next)
-            parents.append(dir)
-            min_dist = min(min_dist, bounded_search(path, parents, dist + 1, bound, final_table))
-            parents.pop()
-            path.pop()
-        else:
-            return total_dist
+            continue    
+        path.append(next)
+        parents.append(dir)
+        min_dist = min(min_dist, bounded_search(path, parents, dist + 1, bound, final_table))
+        parents.pop()
+        path.pop()
     return min_dist
 
 if __name__ == '__main__':
@@ -100,10 +98,10 @@ if __name__ == '__main__':
         table.append(row)
 
     final_table = build_final_table(num_rows, pos)
-    table_print(final_table)
+    # table_print(final_table)
     valid = check_valid_table(table, final_table)
 
-    print(manhattan_distance(table,final_table))
+    # print(manhattan_distance(table,final_table))
     if valid == False:
         print(-1)
         exit(0)
