@@ -3,22 +3,8 @@ import copy
 import math 
 from typing import List, Tuple
 from utils import build_final_table, check_valid_table, get_pos, table_print
-
-def hash_table(table):
-    base = 57
-    MOD = int(1e9+7)
-    hash = 0
-    for x in table:
-        for y in x:
-            hash *= base
-            hash += y
-            hash %= MOD
-    return hash
-        
-def manhattan_distance(table1: List[List[int]], table2: List[List[int]], cache_dist):
-    hash = hash_table(table1)
-    if hash in cache_dist:
-        return cache_dist[hash]  
+    
+def manhattan_distance(table1: List[List[int]], table2: List[List[int]]):  
     table1_entries = [(0,0)] * (len(table1)*len(table1))
     table2_entries = [(0,0)] * (len(table2)*len(table2))
     for i in range(len(table1)):
@@ -30,7 +16,6 @@ def manhattan_distance(table1: List[List[int]], table2: List[List[int]], cache_d
     dist = 0
     for i in range(1, len(table1)*len(table1)):
         dist += get_dist(table1_entries[i], table2_entries[i])
-    cache_dist[hash] = dist 
     return dist
 
 def get_neighbours(table: List[List[int]]):
@@ -62,23 +47,22 @@ def print_ans(path: List[List[int]]):
 
 def ida_star(root: List[List[int]], final_table: List[List[int]]):
     parents = [-1]
-    cache_dist = {}
     prev_pos = (-1,-1)
-    bound = manhattan_distance(root, final_table, cache_dist)
+    bound = manhattan_distance(root, final_table)
     while True:
         mini = int(1e9+7)
-        next_dist = bounded_search(root, prev_pos, parents, 0, bound, final_table, cache_dist)
+        next_dist = bounded_search(root, prev_pos, parents, 0, bound, final_table)
         if next_dist == -1:
             print_ans()
             break
         else:
             bound = next_dist
 
-def bounded_search(cur: List[List[int]], prev_pos: Tuple[int,int], parents: List[str], dist: int, bound: int, final_table: List[List[int]], cache_dist):
+def bounded_search(cur: List[List[int]], prev_pos: Tuple[int,int], parents: List[str], dist: int, bound: int, final_table: List[List[int]]):
     if cur == final_table:
         print_ans(parents)
     
-    total_dist = dist + manhattan_distance(cur, final_table, cache_dist)
+    total_dist = dist + manhattan_distance(cur, final_table)
     if total_dist > bound:
         return total_dist
 
@@ -88,7 +72,7 @@ def bounded_search(cur: List[List[int]], prev_pos: Tuple[int,int], parents: List
             continue  
         cur[ind[0]][ind[1]], cur[ind[2]][ind[3]] = cur[ind[2]][ind[3]], cur[ind[0]][ind[1]]
         parents.append(dir)
-        min_dist = min(min_dist, bounded_search(cur, (ind[0], ind[1]), parents, dist + 1, bound, final_table, cache_dist))
+        min_dist = min(min_dist, bounded_search(cur, (ind[0], ind[1]), parents, dist + 1, bound, final_table))
         parents.pop()
         cur[ind[0]][ind[1]], cur[ind[2]][ind[3]] = cur[ind[2]][ind[3]], cur[ind[0]][ind[1]]
     
