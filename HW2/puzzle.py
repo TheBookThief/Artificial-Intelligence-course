@@ -6,7 +6,7 @@ from utils import build_final_table, check_valid_table, get_pos, table_print
 
 def hash_table(table):
     base = 57
-    MOD = 1e9+7
+    MOD = int(1e9+7)
     hash = 0
     for x in table:
         for y in x:
@@ -69,7 +69,7 @@ def ida_star(root: List[List[int]], final_table: List[List[int]]):
     bound = manhattan_distance(root, final_table, cache_dist)
     while True:
         # print(20*"-")
-        mini = 1e9+7
+        mini = int(1e9+7)
         next_dist = bounded_search(path, parents, 0, bound, final_table, cache_dist)
         if next_dist == -1:
             print_ans()
@@ -87,7 +87,7 @@ def bounded_search(path: List[List[int]], parents: List[List[int]], dist: int, b
     if total_dist > bound:
         return total_dist
     
-    min_dist = 1e9+7
+    min_dist = int(1e9+7)
     for next, dir in zip(*get_neighbours(cur)):
         if next in path:
             continue    
