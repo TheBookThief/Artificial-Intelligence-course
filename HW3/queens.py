@@ -9,15 +9,7 @@ def conflict(q1: Tuple[int,int], q2: Tuple[int,int]):
         return True
     if abs(q1[0]-q2[0]) == abs(q1[1]-q2[1]):
         return True
-
-def is_sol(n: int, queens: List[Tuple[int,int]]):
-    for i in range(len(queens)):
-        for j in range(i+1, len(queens)):
-            q1 = queens[i]
-            q2 = queens[j]
-            if conflict(q1, q2):
-                return False
-    return True
+    return False
 
 def generate_random_queens(n: int):
     rows = list(range(n))
@@ -26,24 +18,66 @@ def generate_random_queens(n: int):
     random.shuffle(cols)
     return list(zip(rows,cols))
 
-def print_ans(queens: List[Tuple[int,int]]):
+def generate_greedy_queens(n: int):
+    queens = []
+    row_conflicts = [0] * n
+    main_diag_conflicts = [0] * (2*n)
+    secondary_diag_conflicts = [0] * (2*n)
+    for j in range(n):
+        min_conflicts = n+1
+        min_rows = []
+        for i in range(n):
+            cur_conflicts = row_conflicts[i] + main_diag_conflicts[i+j] + secondary_diag_conflicts[i+n-j]
+            if cur_conflicts < min_conflicts:
+                min_conflicts = cur_conflicts
+                min_rows = []
+            if cur_conflicts == min_conflicts:
+                min_rows.append(i)
+        min_row = random.choice(min_rows)
+        queens.append((min_row,j))
+        row_conflicts[min_row] += 1
+        main_diag_conflicts[min_row+j] += 1
+        secondary_diag_conflicts[min_row+n-j] += 1 
+    
+    return queens
+
+def print_matrix(n, queens: List[Tuple[int,int]]):
+    print(sorted(queens))
+    for q in sorted(queens):
+        line = list(n * '_')
+        line[q[1]] = '*'
+        print()
+        print(line)
+                
+def print_ans(n, queens: List[Tuple[int,int]]):
     print([x[1] for x in sorted(queens)])
 
 def iterate_on_board(n, queens):
     steps = 0
-    max_steps = 10*n
+    max_steps = 10 * n
+    
+    conflicts = [0] * n
     while steps <= max_steps:
         conflicting = []
-        for i in range(len(queens)):
-            for j in range(len(queens)):
-                if i == j: 
-                    continue
-                if conflict(queens[i], queens[j]):
-                    conflicting.append(i)
-                    break
+        row_conflicts = [0] * n
+        main_diag_conflicts = [0] * (2*n)
+        secondary_diag_conflicts = [0] * (2*n)
+        for q in queens:
+            row_conflicts[q[0]] += 1
+            main_diag_conflicts[q[0]+q[1]] += 1
+            secondary_diag_conflicts[abs(q[0]-0)+abs(q[1]-(n-1))] += 1          
+
+        for i in range(n):
+            q = queens[i]
+            if row_conflicts[q[0]] > 1:
+                conflicting.append(i)
+            if main_diag_conflicts[q[0]+q[1]] > 1:
+                conflicting.append(i)
+            if secondary_diag_conflicts[abs(q[0]-0) + abs(q[1]-(n-1))] > 1:
+                conflicting.append(i)
 
         if not conflicting:
-            return queens
+            return (True, queens)
 
         queen_to_change_index = random.choice(conflicting)
         queen_to_change = queens[queen_to_change_index]
@@ -51,34 +85,50 @@ def iterate_on_board(n, queens):
         min_conflicts = n+1
         next_candidates = []
         for i in range(n):
-            candidate_q = (i,queen_to_change[1]) 
-            candidate_conflicts = 0
-            for q in queens:
-                if conflict(q, candidate_q):
-                    candidate_conflicts += 1
-            # it always conflicts with its old position, doesn't matter codewise, but it's cleaner ideawise
-            candidate_conflicts -= 1
-            if candidate_conflicts < min_conflicts:
+            conflicts[i] = 0
+
+        for q in queens:
+            if q == queen_to_change:
+                continue
+            
+            #row conflict
+            conflicts[q[0]] += 1
+            
+            #diag conflicts
+            #abs(q[0]-X) = abs(q[1]-queen_to_change[1])
+            if 0 <= q[0]-abs(q[1]-queen_to_change[1]) < n:
+                conflicts[q[0]-abs(q[1]-queen_to_change[1])] += 1
+            if 0 <= q[0]+abs(q[1]-queen_to_change[1]) < n:
+                 conflicts[q[0]+abs(q[1]-queen_to_change[1])] += 1
+
+        for i in range(n):
+            if conflicts[i] < min_conflicts:
+                min_conflicts = conflicts[i]
                 next_candidates = []
-                min_conflicts = candidate_conflicts
+            if conflicts[i] == min_conflicts:
+                next_candidates.append(i)
 
-            if candidate_conflicts == min_conflicts:
-                next_candidates.append(candidate_q)
-
-        queens[queen_to_change_index] = random.choice(next_candidates)
+        queens[queen_to_change_index] = (random.choice(next_candidates), queen_to_change[1])
         steps += 1
 
-    return queens
+    return (False, queens)
 
 def solve(n: int):
     if n < 4:
-        print(-1)
+        if n == 1:
+            print([0])
+        else:
+            print(-1)
         exit(0)
-    queens = generate_random_queens(n)
-    while not is_sol(n, queens):
-        queens = generate_random_queens(n) 
-        queens = iterate_on_board(n, queens)
-    print_ans(queens)
+
+    while True:
+        # queens = generate_random_queens(n) 
+        queens = generate_greedy_queens(n)
+        valid, queens = iterate_on_board(n, queens)
+        if valid:
+            break
+    
+    print_ans(n, queens)
 
 if __name__ == '__main__':
     n = int(input())
