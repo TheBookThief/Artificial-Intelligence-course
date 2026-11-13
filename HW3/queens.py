@@ -71,9 +71,9 @@ def iterate_on_board(n, queens):
             q = queens[i]
             if row_conflicts[q[0]] > 1:
                 conflicting.append(i)
-            if main_diag_conflicts[q[0]+q[1]] > 1:
+            elif main_diag_conflicts[q[0]+q[1]] > 1:
                 conflicting.append(i)
-            if secondary_diag_conflicts[abs(q[0]-0) + abs(q[1]-(n-1))] > 1:
+            elif secondary_diag_conflicts[abs(q[0]-0) + abs(q[1]-(n-1))] > 1:
                 conflicting.append(i)
 
         if not conflicting:
@@ -84,8 +84,7 @@ def iterate_on_board(n, queens):
 
         min_conflicts = n+1
         next_candidates = []
-        for i in range(n):
-            conflicts[i] = 0
+        conflicts = [0] * n
 
         for q in queens:
             if q == queen_to_change:
