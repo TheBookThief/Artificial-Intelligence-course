@@ -5,7 +5,13 @@ import random
 def generate_initial_population(n: int, population_size: int):
     population = []
     for i in range(population_size):
-        population.append([random.randint(0,1) for i in range(n)])
+        population.append([])
+        for j in range(n):
+            if random.randint(1, 100) <= 99:
+                population[i].append(0)
+            else:
+                population[i].append(1)
+        # population.append([random.randint(0,1) for _ in range(n)])
     return population
 
 def fitness(arr: List[int], n: int, items: List[Tuple[int,int]], m: int):
@@ -34,7 +40,7 @@ def generate_parents(population_size: int, population: List[List[int]], populati
             parents_indices.append(idx2)
     return parents_indices
 
-def crossover_population(population_size: int, population: List[List[int]], population_parents: List[int]):
+def crossover_population(population_size: int, n: int, population: List[List[int]], population_parents: List[int]):
     #signle point crossover
     crossover_population = []
     for i in range(0, population_size, 2):
@@ -42,7 +48,7 @@ def crossover_population(population_size: int, population: List[List[int]], popu
         crossover_prob = random.random()
         #60 to 40 to crossover
         if crossover_prob <= 0.6:
-            crossover_idx = random.randint(0,population_size-1)
+            crossover_idx = random.randint(1,n-1)
             c1 = copy.deepcopy(population[p1_idx][:crossover_idx]) + copy.deepcopy(population[p2_idx][crossover_idx:])
             c2 = copy.deepcopy(population[p2_idx][:crossover_idx]) + copy.deepcopy(population[p1_idx][crossover_idx:])   
             crossover_population.append(c1)
@@ -62,22 +68,28 @@ def mutate_population(population_size: int, n: int, population: List[List[int]])
     return population
 
 def solve(m, n, items):
-    POPULATION_SIZE = 10
+    POPULATION_SIZE = 500
     population = generate_initial_population(n, POPULATION_SIZE)
     # print(len(population), len(population[0]))
-    steps = 0
-    while steps <= 5:
+    population_last = 0
+    population_last_count = 0
+    while population_last_count < 10:
         population_fitness = [fitness(x, n, items, m) for x in population]
-        print(population, population_fitness)
-        print("Iteration max fitness: ", max(population_fitness))
+        # print(population, population_fitness)
+        # print("Iteration max fitness: ", max(population_fitness))
+        print(max(population_fitness))
         population_parents = generate_parents(POPULATION_SIZE, population, population_fitness)
-        print(population_parents)
-        population_crossover = crossover_population(POPULATION_SIZE, population, population_parents)
-        print(population_crossover)
+        # print(population_parents)
+        population_crossover = crossover_population(POPULATION_SIZE, n, population, population_parents)
+        # print(population_crossover)
         population_mutated = mutate_population(POPULATION_SIZE, n, population_crossover)
-        print(population_mutated)
+        # print(population_mutated)
         population = population_mutated
-        steps += 1
+        if max(population_fitness) == population_last:
+            population_last_count += 1
+        else:
+            population_last = max(population_fitness)
+            population_last_count = 1
 
 if __name__ == '__main__':
     m, n = [int(x) for x in input().split(" ")]
